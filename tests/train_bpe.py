@@ -18,6 +18,8 @@ def train_bpe(
     merge = {}
     PAT = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
     
+
+    
     raw_segments = []
     with open(input_path, encoding="utf-8") as f:
         for line in f:
