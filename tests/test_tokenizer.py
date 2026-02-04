@@ -58,6 +58,9 @@ def get_tokenizer_from_vocab_merges_path(
         for gpt2_vocab_item, gpt2_vocab_index in gpt2_vocab.items()
     }
     # If any of the special tokens don't exist in the vocab, append them to the vocab.
+#   造一个新的 vocab 字典，格式为 { ID: bytes } 。
+# - 例如：如果 json 里是 {"Ġt": 123} ，这里会把它转换成 {123: b" t"} （注意 Ġ 在 GPT-2 中代表空格）。
+#     
     if special_tokens:
         for special_token in special_tokens:
             byte_encoded_special_token = special_token.encode("utf-8")

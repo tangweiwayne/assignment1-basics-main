@@ -52,13 +52,13 @@ def train_bpe(
             # pair_exist: {(b'e', b'l'): [b'Hello', b'help']} (哪些词包含el)
 
     merge = []
-    for _ in range(num_merges):
+    for j in range(num_merges):
         if not pair_count:
             break   
         max_pair = max(pair_count.items(),key=lambda x :(x[1],x[0]))[0]
         newtoken = max_pair[0]+max_pair[1]
         merge.append(max_pair)
-
+        vocab[256+j] = newtoken
         
         for word_l in pair_exist[max_pair]:
             word = token_list[word_l]
@@ -94,10 +94,6 @@ def train_bpe(
             del pair_count[max_pair]
         if max_pair in pair_exist: 
             del pair_exist[max_pair]
-
-    for pair in merge:
-        new_id = len(vocab)
-        vocab[new_id] = pair[0] + pair[1]
     for s_tok in special_tokens:
         s_bytes = s_tok.encode("utf-8")
         vocab[len(vocab)] = s_bytes
