@@ -22,9 +22,37 @@ class BPETokenizer:
         self.gpt2_pat = re.compile(r"""'(?:[sdmt]|ll|re|ve)|?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""")
 
     def encode(self, text: str) -> list[int]:
-        pass
+        if not text:
+            return []
+        if not self.special_regex:
+            return self._encode_text_segment(text)
+        token =[]
+        last_pos = 0
+
+        for match in self.special_regex.finditer(text):
+            pre_text = text[last_pos:match.start()]
+            if pre_text:
+                token.extend(self._encode_text_segment(pre_text))
+            special_tok = match.group()
+            token.append(self.byte2id[special_tok.encode('utf-8')])
+            last_pos = match.end()
+
+        remaining_text = text[last_pos:]
+        if remaining_text:
+            token.extend(self._encode_text_segment(remaining_text))
+        return token
 
     def _encode_text_segment(self, text: str) -> list[int]:
+        # 内部核心函数：对不含特殊 Token 的纯文本片段应用 BPE 合并逻辑。
+        ids =[]
+        pre_token = self.gpt2_pat.findall(text)
+        # 例如："Hello world!" -> ["Hello", " world", "!"]
+
+        for tokenstr in pre_token:
+            byte_part = [bytes[b] for b in tokenstr.encode('utf-8')]
+            # 例如："Hello" -> [b'H', b'e', b'l', b'l', b'o']
+            for merge in self.merges:
+                pass
         pass
 
     def decode(self, ids: list[int]) -> str:
