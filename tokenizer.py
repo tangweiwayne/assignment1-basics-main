@@ -19,7 +19,7 @@ class BPETokenizer:
             self.special_regex = re.compile(special_pat)
         else:
             self.special_regex = None
-        self.gpt2_pat = re.compile(r"""'(?:[sdmt]|ll|re|ve)|?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""")
+        self.gpt2_pat = re.compile(r"""'(?:[sdmt]|ll|re|ve)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""")
 
     def encode(self, text: str) -> list[int]:
         if not text:
@@ -49,17 +49,49 @@ class BPETokenizer:
         # 例如："Hello world!" -> ["Hello", " world", "!"]
 
         for tokenstr in pre_token:
-            byte_part = [bytes[b] for b in tokenstr.encode('utf-8')]
+            byte_part = [bytes([b]) for b in tokenstr.encode('utf-8')]
             # 例如："Hello" -> [b'H', b'e', b'l', b'l', b'o']
-            for merge in self.merges:
-                pass
-        pass
+            while len(byte_part) >1:
+                i = 0
+                min_index = float('inf')
+                best_pair =None
+                for i in range(len(byte_part)-1):
+                    pair = (byte_part[i],byte_part[i+1])
+                    if pair in self.merges:
+                        if self.merges[pair] < min_index:
+                            best_pair = pair
+                            min_index = self.merges[pair]
+                if min_index ==float('inf'):
+                    break
+
+                new_part = []
+                j = 0
+                while j < len(byte_part):
+                    if j < len(byte_part)-1 and (byte_part[j],byte_part[j+1]) == best_pair:
+                        new_part.append(byte_part[j]+byte_part[j+1])
+                        j +=2
+                    else:
+                        new_part.append(byte_part[j])
+                        j +=1
+                byte_part = new_part
+
+            ids.extend([self.byte2id[b] for b in byte_part])
+        return ids
 
     def decode(self, ids: list[int]) -> str:
-        pass
+        byte_segments = [self.id2byte[number] for number in ids]
+        full_bytes = b''.join(byte_segments)
+        return (full_bytes.decode('utf-8',errors="replace"))
 
     def encode_iterable(self, iterable: Iterable[str]) -> Iterable[int]:
-        pass
+            # 1. 遍历输入的可迭代对象（每次拿到一段文本，如一行）
+        for text_chunk in iterable:
+            # 2. 调用你现有的 encode 方法处理这一小段
+            token_ids = self.encode(text_chunk)
+            # 3. 使用 yield from 逐个产出 token，而不是一次性返回列表
+            yield from token_ids
+    # def encode_iterable(self, iterable: Iterable[str]) -> Iterable[int]:
+    #     pass
 
 
 
