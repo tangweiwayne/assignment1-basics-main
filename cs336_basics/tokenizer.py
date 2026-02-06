@@ -84,17 +84,9 @@ class BPETokenizer:
         return (full_bytes.decode('utf-8',errors="replace"))
 
     def encode_iterable(self, iterable: Iterable[str]) -> Iterable[int]:
-            # 1. 遍历输入的可迭代对象（每次拿到一段文本，如一行）
-        for text_chunk in iterable:
-            # 2. 调用你现有的 encode 方法处理这一小段
-            token_ids = self.encode(text_chunk)
-            # 3. 使用 yield from 逐个产出 token，而不是一次性返回列表
-            yield from token_ids
-    # def encode_iterable(self, iterable: Iterable[str]) -> Iterable[int]:
-    #     pass
-
-
-
+        for chunk in iterable:
+        # 对每一块文本进行编码，并通过 yield 吐出结果
+            yield from self.encode(chunk)
 
 
 
