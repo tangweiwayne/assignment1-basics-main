@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import einops
 import math
-from einops import rearrange
 
 class Linear(nn.Module):
     def __init__(self, in_features, out_features, device=None, dtype=None):
@@ -206,6 +205,8 @@ class TransformerLM(nn.Module):
         x = self.post_norm(x)
         x = self.lm_head(x)
         return x
+    
+
 
 
 
